@@ -1,0 +1,13 @@
+# services/mediamtx/mediamtx.yml
+paths:
+  all:
+    source: publisher
+
+# Cấu hình WebRTC để Dashboard xem mượt
+webrtc: yes
+webrtcAddress: :8889
+webrtcICEUDP: yes
+
+# Cấu hình RTSP để AI Service kéo luồng
+rtsp: yes
+rtspAddress: :8554

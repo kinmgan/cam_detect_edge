@@ -1,0 +1,91 @@
+
+services:
+  # 1. Redis: Bộ đệm Metadata [cite: 25]
+  redis_broker:
+    image: redis:7.0-alpine
+    container_name: edge_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis_data:/data
+    restart: always
+    networks:
+      - edge_network
+
+  # 2. MediaMTX: Streaming RTSP/WebRTC 
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: edge_streaming
+    ports:
+      - "8554:8554"   
+      - "8889:8889"   
+    volumes:
+      - ./services/mediamtx/mediamtx.yml:/mediamtx.yml
+    restart: always
+    networks:
+      - edge_network
+
+  # 3. Backend: FastAPI [cite: 25]
+  backend:
+    build: ./services/backend_fastapi
+    container_name: edge_backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis_broker
+      - postgres_db
+    environment:
+      - REDIS_HOST=redis_broker
+      - REDIS_PORT=6379
+      - DATABASE_URL=postgresql://admin:secretpassword@edge_postgres:5432/smart_camera_db
+    restart: always
+    networks:
+      - edge_network
+
+  # 4. PostgreSQL: Database [cite: 25]
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: edge_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: smart_camera_db
+    volumes:
+      - ./data/postgres_data:/var/lib/postgresql/data
+    networks:
+      - edge_network
+
+  # 5. Frontend: Dashboard [cite: 29]
+  frontend:
+    build: ./services/frontend_dashboard
+    container_name: edge_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - edge_network
+
+  # 6. AI Worker (Bản OpenCV chạy CPU)
+  # ai_worker:
+  #   build: ./services/ai_opencv
+  #   container_name: edge_ai_opencv
+  #   # Tắt cấu hình GPU để chạy trên lap
+  #   # runtime: nvidia 
+  #   environment:
+  #     - REDIS_HOST=redis_broker
+  #     - RTSP_URL=rtsp://mediamtx:8554/cam_01
+  #     - TARGET_FPS=2 
+  #   depends_on:
+  #     - redis_broker
+  #     - mediamtx
+  #   networks:
+  #     - edge_network
+
+networks:
+  edge_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

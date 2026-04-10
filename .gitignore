@@ -1,0 +1,76 @@
+# ==========================================
+# Môi trường và Cấu hình nhạy cảm
+# ==========================================
+.env
+.env.*
+*.local
+
+# ==========================================
+# Dữ liệu cục bộ (Databases)
+# ==========================================
+data/postgres_data/
+data/redis_data/
+
+# ==========================================
+# Python (Backend FastAPI & AI Services)
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env_python/
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ==========================================
+# Node.js (Frontend Dashboard)
+# ==========================================
+services/frontend_dashboard/node_modules/
+services/frontend_dashboard/build/
+services/frontend_dashboard/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# ==========================================
+# AI Models / Weights
+# ==========================================
+# (Các file model thường rất nặng, không nên push trực tiếp lên Git)
+services/ai_opencv/ai_engine/weights/*.pt
+services/ai_opencv/ai_engine/weights/*.pth
+services/ai_opencv/ai_engine/weights/*.onnx
+services/ai_opencv/ai_engine/weights/*.engine
+services/ai_opencv/ai_engine/weights/*.h5
+services/ai_opencv/ai_engine/weights/*.pb
+
+# ==========================================
+# IDE / OS Files
+# ==========================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
