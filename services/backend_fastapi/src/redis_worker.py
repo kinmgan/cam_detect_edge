@@ -5,9 +5,11 @@ import asyncio
 import os
 
 class RedisWorker:
-    def __init__(self, host='redis', port=6379):
+    def __init__(self):
+        host = os.getenv("REDIS_HOST", "redis_broker")
+        port = int(os.getenv("REDIS_PORT", 6379))
         self.r = redis.Redis(host=host, port=port, decode_responses=True)
-        self.channel = "camera_metadata_stream" # Channel để pub/sub hoặc dùng key
+        self.channel = "camera_metadata_stream"
 
     async def listen_metadata(self, callback):
         """

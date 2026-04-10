@@ -17,8 +17,9 @@ services:
     image: bluenviron/mediamtx:latest
     container_name: edge_streaming
     ports:
-      - "8554:8554"   
-      - "8889:8889"   
+      - "8554:8554"   # RTSP
+      - "8889:8889"   # WebRTC
+      - "9997:9997"   # REST API
     volumes:
       - ./services/mediamtx/mediamtx.yml:/mediamtx.yml
     restart: always

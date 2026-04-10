@@ -1,13 +1,27 @@
 # services/mediamtx/mediamtx.yml
+
+# REST API để kiểm tra stream từ host
+api: yes
+apiAddress: :9997
+
+# Cho phép anonymous: đọc API, publish RTSP, và xem stream
+authInternalUsers:
+  - user: any
+    pass: ""
+    permissions:
+      - action: api
+      - action: publish
+      - action: read
+      - action: playback
+
+# RTSP để AI Service kéo luồng
+rtsp: yes
+rtspAddress: :8554
+
+# WebRTC để Dashboard xem stream
+webrtc: yes
+webrtcAddress: :8889
+
 paths:
   all:
     source: publisher
-
-# Cấu hình WebRTC để Dashboard xem mượt
-webrtc: yes
-webrtcAddress: :8889
-webrtcICEUDP: yes
-
-# Cấu hình RTSP để AI Service kéo luồng
-rtsp: yes
-rtspAddress: :8554
