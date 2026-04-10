@@ -32,9 +32,9 @@ def main():
     logger.info(f"Hệ thống vận hành: {CAMERA_ID} | Target: {TARGET_FPS} FPS")
 
     try:
-        for frame in stream_loader.get_frames():  # retry vô hạn khi stream đứt
+        for frame, capture_time in stream_loader.get_frames():  # retry vô hạn khi stream đứt
             detections = ai_engine.predict(frame)
-            publisher.publish_metadata(camera_id=CAMERA_ID, detections=detections)
+            publisher.publish_metadata(camera_id=CAMERA_ID, detections=detections, capture_time=capture_time)
 
             if detections:
                 logger.info(f"[{CAMERA_ID}] Phát hiện {len(detections)} đối tượng.")

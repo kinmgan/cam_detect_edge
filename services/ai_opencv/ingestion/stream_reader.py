@@ -14,6 +14,7 @@ class StreamLoader:
         self.retry_interval = retry_interval
 
         self._latest_frame = None
+        self._latest_capture_time = None
         self._lock = threading.Lock()
         self._has_frame = threading.Event()
 
@@ -47,6 +48,7 @@ class StreamLoader:
         cap = self._open()
         while True:
             ret, frame = cap.read()
+            capture_time = time.time()
             if not ret:
                 logger.warning("Mất kết nối RTSP. Đang thử kết nối lại...")
                 cap.release()
@@ -55,6 +57,7 @@ class StreamLoader:
 
             with self._lock:
                 self._latest_frame = frame
+                self._latest_capture_time = capture_time
             self._has_frame.set()
 
     def get_frames(self):
@@ -69,8 +72,9 @@ class StreamLoader:
             if current_time - last_yield_time >= self.frame_interval:
                 with self._lock:
                     frame = self._latest_frame
+                    capture_time = self._latest_capture_time
                 last_yield_time = current_time
-                yield frame
+                yield frame, capture_time
             else:
                 # Ngủ ngắn tránh busy-wait
                 time.sleep(0.01)

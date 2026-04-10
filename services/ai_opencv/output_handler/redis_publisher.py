@@ -7,10 +7,11 @@ class RedisPublisher:
     def __init__(self, host='redis', port=6379, db=0):
         self.r = redis.StrictRedis(host=host, port=port, db=db, decode_responses=True)
 
-    def publish_metadata(self, camera_id, detections):
+    def publish_metadata(self, camera_id, detections, capture_time):
         payload = {
             "camera_id": camera_id,
-            "timestamp": time.time(),
+            "capture_timestamp": capture_time,
+            "publish_timestamp": time.time(),
             "detections": {
                 "yolo11_default": detections
             },
