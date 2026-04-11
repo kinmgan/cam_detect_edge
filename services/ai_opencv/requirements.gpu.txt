@@ -1,0 +1,8 @@
+numpy
+opencv-python-headless
+redis
+python-dotenv
+
+# Install NVIDIA runtime-specific dependencies inside the GPU image or base image:
+# - PyNvVideoCodec
+# - cvcuda

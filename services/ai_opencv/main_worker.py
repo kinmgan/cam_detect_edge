@@ -1,48 +1,54 @@
 # services/ai_opencv/main_worker.py
-import os
 import logging
-from ingestion.stream_reader import StreamLoader
-from ai_engine.wrapper import AIModelWrapper
-from output_handler.redis_publisher import RedisPublisher
-from command_listener import CommandListener
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+from config.settings import Settings
+from factories.runtime import create_decoder, create_frame_store, create_preprocessor, create_publisher
+from metrics.health_monitor import HealthMonitor
+from orchestration.pipeline import PreprocessPipeline
+
+
 logger = logging.getLogger(__name__)
 
+
 def main():
-    # 1. Cấu hình từ biến môi trường
-    RTSP_URL  = os.getenv("RTSP_URL",  "rtsp://localhost:8554/cam1")
-    CAMERA_ID = os.getenv("CAMERA_ID", "cam_001")
-    TARGET_FPS = int(os.getenv("TARGET_FPS", 2))
-    REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-    REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+    settings = Settings.from_env()
+    logging.basicConfig(level=getattr(logging, settings.log_level, logging.INFO), format="%(asctime)s - %(levelname)s - %(message)s")
 
-    # 2. Khởi tạo AI Engine
-    ai_engine = AIModelWrapper(model_path="ai_engine/weights/yolo11n.pt")
+    decoder = create_decoder(settings)
+    preprocessor = create_preprocessor(settings)
+    frame_store = create_frame_store(settings)
+    publisher = create_publisher(settings)
+    health_monitor = HealthMonitor(
+        camera_id=settings.camera_id,
+        backend=settings.pipeline_backend,
+        health_publish_interval_sec=settings.health_publish_interval_sec,
+    )
+    pipeline = PreprocessPipeline(
+        decoder=decoder,
+        preprocessor=preprocessor,
+        frame_store=frame_store,
+        publisher=publisher,
+        settings=settings,
+        health_monitor=health_monitor,
+    )
 
-    # 3. Command Listener (đổi model nóng từ Dashboard)
-    cmd_listener = CommandListener(ai_engine, host=REDIS_HOST, port=REDIS_PORT)
-    cmd_listener.start()
-    logger.info("Command Listener đã sẵn sàng.")
-
-    # 4. Stream & Output
-    stream_loader = StreamLoader(rtsp_url=RTSP_URL, target_fps=TARGET_FPS)
-    publisher     = RedisPublisher(host=REDIS_HOST, port=REDIS_PORT)
-
-    logger.info(f"Hệ thống vận hành: {CAMERA_ID} | Target: {TARGET_FPS} FPS")
+    logger.info(
+        "Preprocess pipeline running | camera=%s backend=%s source=%s target_fps=%s store=%s",
+        settings.camera_id,
+        settings.pipeline_backend,
+        settings.input_source,
+        settings.target_fps,
+        settings.frame_store_dir,
+    )
 
     try:
-        for frame, capture_time in stream_loader.get_frames():  # retry vô hạn khi stream đứt
-            detections = ai_engine.predict(frame)
-            publisher.publish_metadata(camera_id=CAMERA_ID, detections=detections, capture_time=capture_time)
-
-            if detections:
-                logger.info(f"[{CAMERA_ID}] Phát hiện {len(detections)} đối tượng.")
-
+        pipeline.run()
     except KeyboardInterrupt:
-        logger.info("Dừng hệ thống.")
-    except Exception as e:
-        logger.error(f"Lỗi nghiêm trọng: {e}")
+        logger.info("Stopping preprocess pipeline.")
+    except Exception as exc:
+        logger.error("Fatal preprocess pipeline error: %s", exc)
+        raise
+
 
 if __name__ == "__main__":
     main()
