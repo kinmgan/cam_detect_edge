@@ -5,6 +5,8 @@ import redis
 from events.preprocess_event import serialize_stream_entry
 
 
+import os
+
 class RedisStreamPublisher:
     def __init__(
         self,
@@ -16,7 +18,8 @@ class RedisStreamPublisher:
         enable_stream_publish: bool = True,
         enable_health_publish: bool = True,
     ):
-        self.r = redis.Redis(host=host, port=port, decode_responses=True)
+        password = os.getenv("REDIS_PASSWORD", None)
+        self.r = redis.Redis(host=host, port=port, password=password, decode_responses=True)
         self.preprocess_stream = preprocess_stream
         self.health_stream = health_stream
         self.stream_maxlen = stream_maxlen

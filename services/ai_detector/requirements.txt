@@ -1,0 +1,4 @@
+redis
+numpy
+ultralytics
+python-dotenv
