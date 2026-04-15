@@ -1,6 +1,8 @@
+import './globals.css'
+
 export const metadata = {
   title: 'AI Camera Dashboard',
-  description: 'Edge Computing with RTX 4070',
+  description: 'Edge Computing',
 }
 
 export default function RootLayout({ children }) {

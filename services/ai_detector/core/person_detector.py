@@ -4,7 +4,7 @@ from ultralytics import YOLO
 logger = logging.getLogger(__name__)
 
 class PersonDetector:
-    def __init__(self, weights_path="yolov11n.pt"):
+    def __init__(self, weights_path="services\ai_detector\models\person_detector\weights\yolo11m.pt"):
         """
         Khởi tạo Model YOLO. Nếu weights_path rỗng hoặc dùng tên model rỗng, ultralytics sẽ tự động tải pre-train.
         """

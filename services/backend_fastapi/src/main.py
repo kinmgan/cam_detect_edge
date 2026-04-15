@@ -4,7 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from .redis_worker import RedisWorker
 import asyncio
 import json
+import os
+from dotenv import load_dotenv
 from .routers import camera
+
+load_dotenv()
 
 app = FastAPI(title="Camera AI Backend")
 

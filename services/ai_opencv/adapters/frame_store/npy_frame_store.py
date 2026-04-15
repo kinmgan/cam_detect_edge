@@ -47,9 +47,12 @@ class NpyFrameStore:
         for path in self.store_dir.glob("*.npy"):
             try:
                 if path.stat().st_mtime < cutoff:
+                    # Trên Windows, việc xóa file có thể lỗi nếu tiến trình AI khác đang đọc file đó.
+                    # Chúng ta bỏ qua và để lượt dọn dẹp sau xử lý tiếp.
                     path.unlink(missing_ok=True)
                     removed += 1
-            except FileNotFoundError:
+            except (FileNotFoundError, PermissionError, OSError):
+                # Bỏ qua lỗi khóa file hoặc file đã bị xóa bởi tiến trình khác
                 continue
         return removed
 

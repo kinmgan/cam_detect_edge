@@ -1,4 +1,7 @@
 # services/ai_opencv/main_worker.py
+import os
+os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp|fflags;nobuffer|stimeout;5000000"
+
 import logging
 
 from config.settings import Settings

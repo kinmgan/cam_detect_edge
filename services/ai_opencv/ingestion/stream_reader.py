@@ -35,11 +35,16 @@ class StreamLoader:
     def _open(self):
         import os
 
-        os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp|fflags;nobuffer"
+        # Thiết lập các tùy chọn FFmpeg thông qua biến môi trường (OpenCV backend)
+        # Server đã được cấu hình ép TCP nên không cần hack URL nữa
+        os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp|fflags;nobuffer|stimeout;10000000"
+        
         while True:
             logger.info("Connecting source: %s", self.rtsp_url)
             cap = cv2.VideoCapture(self.rtsp_url, cv2.CAP_FFMPEG)
+            
             if cap.isOpened():
+                # Giảm buffer để giảm độ trễ
                 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
                 logger.info("Source connection established.")
                 return cap

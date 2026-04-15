@@ -17,8 +17,10 @@ services:
     image: bluenviron/mediamtx:latest
     container_name: edge_streaming
     ports:
-      - "8554:8554"   # RTSP
+      - "8554:8554"   # RTSP TCP
+      - "8554:8554/udp" # RTSP UDP
       - "8889:8889"   # WebRTC
+      - "8189:8189/udp" # WebRTC ICE/UDP
       - "9997:9997"   # REST API
     volumes:
       - ./services/mediamtx/mediamtx.yml:/mediamtx.yml
@@ -27,6 +29,7 @@ services:
       - edge_network
 
   # 3. Backend: FastAPI [cite: 25]
+  # Trong mạng Docker: redis_broker / postgres_db (tên service). Trình duyệt trên host: localhost:8000.
   backend:
     build: ./services/backend_fastapi
     container_name: edge_backend
@@ -57,8 +60,15 @@ services:
       - edge_network
 
   # 5. Frontend: Dashboard [cite: 29]
+  # Trình duyệt gọi API/WebRTC qua cổng host (8000, 8889), không dùng tên container backend.
+  # Build mới: docker compose up -d --build  (hoặc: docker compose build --no-cache frontend)
   frontend:
-    build: ./services/frontend_dashboard
+    build:
+      context: ./services/frontend_dashboard
+      args:
+        NEXT_PUBLIC_EDGE_HOST: ${NEXT_PUBLIC_EDGE_HOST:-}
+        NEXT_PUBLIC_API_PORT: ${NEXT_PUBLIC_API_PORT:-8000}
+        NEXT_PUBLIC_MEDIAMTX_HTTP_PORT: ${NEXT_PUBLIC_MEDIAMTX_HTTP_PORT:-8889}
     container_name: edge_frontend
     ports:
       - "3000:3000"
@@ -75,7 +85,7 @@ services:
   #   # runtime: nvidia 
   #   environment:
   #     - REDIS_HOST=redis_broker
-  #     - RTSP_URL=rtsp://mediamtx:8554/cam_01
+  #     - RTSP_URL=rtsp://mediamtx:8554/cam1
   #     - TARGET_FPS=2 
   #   depends_on:
   #     - redis_broker

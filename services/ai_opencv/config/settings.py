@@ -20,8 +20,8 @@ def _as_bool(value: str | None, default: bool) -> bool:
 class Settings:
     pipeline_backend: str = "cpu"
     pipeline_version: str = "v1"
-    input_source: str = "rtsp://localhost:8554/cam1"
-    camera_id: str = "cam_001"
+    input_source: str = "rtsp://127.0.0.1:8554/cam1"
+    camera_id: str = "cam1"
     target_fps: int = 2
     retry_interval: int = 5
     motion_threshold: float = 0.5
@@ -45,7 +45,7 @@ class Settings:
 
     @classmethod
     def from_env(cls) -> "Settings":
-        input_source = os.getenv("INPUT_SOURCE") or os.getenv("RTSP_URL") or "rtsp://localhost:8554/cam1"
+        input_source = os.getenv("INPUT_SOURCE") or os.getenv("RTSP_URL") or "rtsp://127.0.0.1:8554/cam1"
         frame_store_dir = os.getenv("FRAME_STORE_DIR")
         if not frame_store_dir:
             frame_store_dir = str((Path.cwd() / "data" / "frame_store").resolve())
@@ -54,13 +54,13 @@ class Settings:
             pipeline_backend=os.getenv("PIPELINE_BACKEND", "cpu").strip().lower(),
             pipeline_version=os.getenv("PIPELINE_VERSION", "v1"),
             input_source=input_source,
-            camera_id=os.getenv("CAMERA_ID", "cam_001"),
+            camera_id=os.getenv("CAMERA_ID", "cam1"),
             target_fps=int(os.getenv("TARGET_FPS", 2)),
             retry_interval=int(os.getenv("RETRY_INTERVAL", 5)),
             motion_threshold=float(os.getenv("MOTION_THRESHOLD", 0.5)),
             frame_store_dir=frame_store_dir,
             frame_ttl_sec=int(os.getenv("FRAME_TTL_SEC", 30)),
-            redis_host=os.getenv("REDIS_HOST", "localhost"),
+            redis_host=os.getenv("REDIS_HOST", "127.0.0.1"),
             redis_port=int(os.getenv("REDIS_PORT", 6379)),
             enable_stream_publish=_as_bool(os.getenv("ENABLE_STREAM_PUBLISH"), True),
             enable_health_publish=_as_bool(os.getenv("ENABLE_HEALTH_PUBLISH"), True),

@@ -74,3 +74,7 @@ services/ai_opencv/ai_engine/weights/*.pb
 .DS_Store
 Thumbs.db
 *.swp
+
+data/frame_store/
+
+*.npy

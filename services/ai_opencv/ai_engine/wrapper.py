@@ -10,7 +10,7 @@ class AIModelWrapper:
 
     def switch_model(self, model_name):
         """Đổi model an toàn từ CommandListener thread."""
-        new_path = f"ai_engine/weights/{model_name}.pt"
+        new_path = f"services\ai_detector\models\person_detector\weights\{model_name}.pt"
         if new_path != self.current_model_path:
             with self._lock:
                 self.model = YOLO(new_path)

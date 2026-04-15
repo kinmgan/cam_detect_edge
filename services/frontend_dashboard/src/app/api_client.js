@@ -1,12 +1,25 @@
-// services/frontend_dashboard/src/api_client.js
+import { edgeWsMetadataUrl } from './edgeEndpoints';
+
 export const createMetadataSocket = (onMessage) => {
-    const socket = new WebSocket('ws://localhost:8000/ws/metadata');
+    const socket = new WebSocket(edgeWsMetadataUrl());
 
     socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        onMessage(data);
+        try {
+            const data = JSON.parse(event.data);
+            onMessage(data);
+        } catch (e) {
+            console.error("Lỗi parse dữ liệu WebSocket:", e);
+        }
     };
 
-    socket.onclose = () => console.log("WebSocket Closed. Reconnecting...");
+    socket.onclose = () => {
+        console.log("WebSocket bị ngắt. Đang thử kết nối lại sau 3 giây...");
+        setTimeout(() => createMetadataSocket(onMessage), 3000);
+    };
+
+    socket.onerror = (err) => {
+        console.error("Lỗi kết nối WebSocket:", err);
+    };
+
     return socket;
 };
